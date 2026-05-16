@@ -14,74 +14,73 @@
 
     <main class="page">
 
+      <!-- ═══ 头部：姓名 + 联系方式 + 证件照 ═══ -->
       <header class="header">
-        <div class="header-main">
-          <div class="header-left">
-            <h1>{{ basics.name }}</h1>
-            <p class="meta">求职岗位：{{ basics.position }}</p>
-            <p class="meta">{{ basics.age }} | {{ basics.gender }}</p>
-            <p class="meta">Telephone：{{ basics.phone }}  |  Email：{{ basics.email }}</p>
-          </div>
+        <div class="header-info">
+          <h1>{{ basics.name }}</h1>
+          {% if basics.position %}<p class="meta">求职意向：{{ basics.position }}</p>{% endif %}
+          <p class="meta">
+            {% if basics.phone %}电话：{{ basics.phone }}{% endif %}
+            {% if basics.phone and basics.email %}  |  {% endif %}
+            {% if basics.email %}邮箱：{{ basics.email }}{% endif %}
+          </p>
+          {% if basics.age or basics.gender %}<p class="meta">{{ basics.age }}{% if basics.age and basics.gender %} | {% endif %}{{ basics.gender }}</p>{% endif %}
+          {% if code %}
+          {% for c in code %}
+          <p class="meta">{{ c.label }}：<a href="{{ c.url }}" target="_blank" rel="noreferrer">{{ c.url }}</a></p>
+          {% endfor %}
+          {% endif %}
+        </div>
+        <div class="header-photo">
+          {% if basics.photo %}
+          <img src="{{ basics.photo }}" alt="证件照" />
+          {% else %}
+          <div class="photo-placeholder">证件照</div>
+          {% endif %}
         </div>
       </header>
 
-      {% if education %}
+      <!-- ═══ 个人信息 ═══ -->
       <section>
-        <h2>学习经历</h2>
-        <table class="edu-table">
-          {% for edu in education %}
-          <tr>
-            <td class="col-date">{{ edu.date }}</td>
-            <td class="col-center"><strong>{{ edu.school }}</strong></td>
-            <td class="col-right">{{ edu.major }}</td>
-          </tr>
-          {% endfor %}
-        </table>
-      </section>
-      {% endif %}
-
-      {% if code %}
-      <section>
-        <h2>代码</h2>
-        <div class="code-links">
-          {% for c in code %}
-          <p>{{ c.label }}：<a href="{{ c.url }}" target="_blank" rel="noreferrer">{{ c.url }}</a></p>
+        <h2>个人信息</h2>
+        {% for edu in education %}
+        <article class="block">
+          <div class="proj-row">
+            {% if edu.date %}<span class="proj-date">{{ edu.date }}</span>{% endif %}
+            <span class="proj-company"><strong>{{ edu.school }}</strong></span>
+            <span class="proj-role">{{ edu.major }}</span>
+          </div>
+          {% if edu.honors %}
+          <p class="edu-honors">荣誉奖励：{{ edu.honors | join("、") }}</p>
+          {% endif %}
+          {% if edu.courses %}
+          <p class="edu-courses">主修课程：{{ edu.courses }}</p>
+          {% endif %}
+        </article>
+        {% endfor %}
+        {% if skills %}
+        <div class="skills-inline">
+          {% for sk in skills %}
+          <p><strong>{{ sk.category }}：</strong>{{ sk.detail }}</p>
           {% endfor %}
         </div>
+        {% endif %}
       </section>
-      {% endif %}
-
-      {% if personal_docs %}
-      <section>
-        <h2>个人文档</h2>
-        <p class="docs-summary">{{ personal_docs["summary"] }}</p>
-        <ul>
-          {% for item in personal_docs["items"] %}
-          <li>{{ item["text"] }} — <a href="{{ item["url"] }}" target="_blank" rel="noreferrer">{{ item["url"] }}</a></li>
-          {% endfor %}
-        </ul>
-      </section>
-      {% endif %}
 
       {% if team_projects %}
       <section>
-        <h2>团队项目</h2>
+        <h2>科研项目</h2>
         {% for proj in team_projects %}
         <article class="block">
           <div class="proj-row">
             <span class="proj-date">{{ proj.date }}</span>
-            <span class="proj-company"><strong>{{ proj.company }}</strong></span>
+            <span class="proj-company"><strong>{{ proj.name }}</strong></span>
             <span class="proj-role">{{ proj.role }}</span>
           </div>
-          {% if proj.name %}
-          <p class="proj-title">
-            {% if proj.url %}<a href="{{ proj.url }}" target="_blank" rel="noreferrer">{{ proj.name }}</a>{% else %}{{ proj.name }}{% endif %}
-          </p>
-          {% endif %}
-          {% if proj.description %}
-          <p class="proj-desc">
-            {% if proj.url and not proj.name %}<a href="{{ proj.url }}" target="_blank" rel="noreferrer">{{ proj.description }}</a>{% else %}{{ proj.description }}{% endif %}
-          </p>
+          {% if proj.company %}
+          <p class="proj-meta">{{ proj.company }}{% if proj.description %} · {{ proj.description }}{% endif %}</p>
+          {% elif proj.description %}
+          <p class="proj-meta">{{ proj.description }}</p>
           {% endif %}
           {% if proj.highlights %}
           <ul>
@@ -91,10 +90,35 @@
           </ul>
           {% endif %}
           {% if proj.tech_stack %}
-          <p class="tech-stack"><strong>技术栈：</strong>{{ proj.tech_stack }}</p>
+          <p class="tech-stack">{{ proj.tech_stack }}</p>
           {% endif %}
         </article>
         {% endfor %}
+      </section>
+      {% endif %}
+
+      {% if awards %}
+      <section>
+        <h2>竞赛获奖</h2>
+        <ul>
+          {% for award in awards %}
+          <li>{{ award.text }} <span class="award-date">{{ award.date }}</span></li>
+          {% endfor %}
+        </ul>
+      </section>
+      {% endif %}
+
+      {% if publications %}
+      <section>
+        <h2>学术成果</h2>
+        <ul class="pub-list">
+          {% for pub in publications %}
+          <li>
+            {{ pub.text | safe }}
+            {% if pub.url %}[<a href="{{ pub.url }}" target="_blank" rel="noreferrer">PDF</a>]{% endif %}
+          </li>
+          {% endfor %}
+        </ul>
       </section>
       {% endif %}
 
@@ -105,24 +129,14 @@
         <article class="block">
           <div class="proj-row">
             <span class="proj-date">{{ proj.date }}</span>
-            <span class="proj-company">
-              <strong>{% if proj.url %}<a href="{{ proj.url }}" target="_blank" rel="noreferrer">{{ proj.name }}</a>{% else %}{{ proj.name }}{% endif %}</strong>
-            </span>
+            <span class="proj-company"><strong>{{ proj.name }}</strong></span>
             <span class="proj-role">{{ proj.role }}</span>
           </div>
-          {% if proj.description %}
-          <p class="proj-desc">{{ proj.description }}</p>
-          {% endif %}
+          {% if proj.description %}<p class="proj-desc">{{ proj.description }}</p>{% endif %}
           {% if proj.highlights %}
-          <ul>
-            {% for h in proj.highlights %}
-            <li>{{ h }}</li>
-            {% endfor %}
-          </ul>
+          <ul>{% for h in proj.highlights %}<li>{{ h }}</li>{% endfor %}</ul>
           {% endif %}
-          {% if proj.tech_stack %}
-          <p class="tech-stack"><strong>技术栈：</strong>{{ proj.tech_stack }}</p>
-          {% endif %}
+          {% if proj.tech_stack %}<p class="tech-stack">{{ proj.tech_stack }}</p>{% endif %}
         </article>
         {% endfor %}
       </section>
@@ -135,26 +149,30 @@
         <article class="block">
           <div class="proj-row">
             <span class="proj-date">{{ proj.date }}</span>
-            <span class="proj-company">
-              <strong>{% if proj.url %}<a href="{{ proj.url }}" target="_blank" rel="noreferrer">{{ proj.name }}</a>{% else %}{{ proj.name }}{% endif %}</strong>
-            </span>
+            <span class="proj-company"><strong>{{ proj.name }}</strong></span>
             <span class="proj-role">{{ proj.role }}</span>
           </div>
-          {% if proj.description %}
-          <p class="proj-desc">{{ proj.description }}</p>
-          {% endif %}
+          {% if proj.description %}<p class="proj-desc">{{ proj.description }}</p>{% endif %}
           {% if proj.highlights %}
-          <ul>
-            {% for h in proj.highlights %}
-            <li>{{ h }}</li>
-            {% endfor %}
-          </ul>
+          <ul>{% for h in proj.highlights %}<li>{{ h }}</li>{% endfor %}</ul>
           {% endif %}
-          {% if proj.tech_stack %}
-          <p class="tech-stack"><strong>技术栈：</strong>{{ proj.tech_stack }}</p>
-          {% endif %}
+          {% if proj.tech_stack %}<p class="tech-stack">{{ proj.tech_stack }}</p>{% endif %}
         </article>
         {% endfor %}
+      </section>
+      {% endif %}
+
+      {% if personal_docs and (personal_docs["summary"] or personal_docs["items"]) %}
+      <section>
+        <h2>个人文档</h2>
+        {% if personal_docs["summary"] %}<p class="docs-summary">{{ personal_docs["summary"] }}</p>{% endif %}
+        {% if personal_docs["items"] %}
+        <ul>
+          {% for item in personal_docs["items"] %}
+          <li>{{ item["text"] }} — <a href="{{ item["url"] }}" target="_blank" rel="noreferrer">{{ item["url"] }}</a></li>
+          {% endfor %}
+        </ul>
+        {% endif %}
       </section>
       {% endif %}
 

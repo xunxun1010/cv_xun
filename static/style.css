@@ -18,8 +18,8 @@ body {
   font-family: "Source Han Sans SC", "Noto Sans SC", "PingFang SC", "Microsoft YaHei", "Helvetica Neue", Arial, sans-serif;
   color: var(--text);
   background: var(--bg);
-  font-size: 14px;
-  line-height: 1.6;
+  font-size: 13px;
+  line-height: 1.5;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -37,114 +37,123 @@ a:hover {
   min-height: 297mm;
   margin: 0 auto;
   background: var(--panel);
-  padding: 28px 32px;
+  padding: 24px 28px 16px;
 }
 
-/* ── Header ── */
+/* ══════════════════════════════════════
+   Header — 姓名 + 联系方式 | 证件照
+   ══════════════════════════════════════ */
 
 .header {
-  margin-bottom: 4px;
-}
-
-.header-main {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
+  margin-bottom: 10px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid var(--line);
 }
 
-.header-left h1 {
+.header-info {
+  flex: 1;
+}
+
+.header-info h1 {
   font-size: 28px;
   font-weight: 700;
   margin-bottom: 4px;
   color: var(--text);
+  letter-spacing: 4px;
 }
 
-.header-left .meta {
+.header-info .meta {
   font-size: 13px;
   color: var(--subtle);
   margin-bottom: 2px;
   line-height: 1.6;
 }
 
-/* ── Section headers ── */
+.header-photo {
+  flex-shrink: 0;
+  width: 100px;
+  height: 130px;
+  margin-left: 20px;
+  border: 1px solid #ddd;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.header-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.photo-placeholder {
+  font-size: 12px;
+  color: #aaa;
+  text-align: center;
+  line-height: 1.4;
+}
+
+/* ══════════════════════════════════════
+   Section headers
+   ══════════════════════════════════════ */
 
 section {
-  margin-top: 14px;
+  margin-top: 10px;
 }
 
 section h2 {
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 700;
   color: var(--primary);
-  padding-bottom: 4px;
+  padding-bottom: 3px;
   border-bottom: 1.5px solid var(--line);
-  margin-bottom: 8px;
-}
-
-/* ── Education table ── */
-
-.edu-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.edu-table td {
-  padding: 3px 0;
-  font-size: 13.5px;
-}
-
-.col-date {
-  width: 180px;
-  font-weight: 700;
-}
-
-.col-center {
-  text-align: center;
-}
-
-.col-right {
-  text-align: right;
-  color: var(--subtle);
-}
-
-/* ── Code links ── */
-
-.code-links p {
-  font-size: 13.5px;
-  margin-bottom: 2px;
-}
-
-/* ── Personal docs ── */
-
-.docs-summary {
-  font-size: 13.5px;
   margin-bottom: 6px;
-  color: var(--text);
 }
 
-/* ── Project blocks ── */
+/* ══════════════════════════════════════
+   Education
+   ══════════════════════════════════════ */
+
+.edu-honors {
+  font-size: 12.5px;
+  color: var(--text);
+  margin-top: 2px;
+}
+
+.edu-courses {
+  font-size: 12.5px;
+  color: var(--subtle);
+  margin-top: 1px;
+}
+
+/* ══════════════════════════════════════
+   Project blocks
+   ══════════════════════════════════════ */
 
 .block {
-  margin-bottom: 14px;
+  margin-bottom: 8px;
 }
 
 .proj-row {
   display: flex;
   align-items: baseline;
-  margin-bottom: 2px;
+  margin-bottom: 1px;
 }
 
 .proj-date {
-  font-size: 13px;
+  font-size: 12.5px;
   font-weight: 700;
-  min-width: 160px;
+  min-width: 130px;
   flex-shrink: 0;
+  color: var(--subtle);
 }
 
 .proj-company {
   flex: 1;
-  text-align: center;
-  font-size: 14px;
+  font-size: 13px;
 }
 
 .proj-company a {
@@ -156,32 +165,30 @@ section h2 {
 }
 
 .proj-role {
-  font-size: 13px;
+  font-size: 12px;
   text-align: right;
-  min-width: 80px;
+  min-width: 70px;
   flex-shrink: 0;
   color: var(--subtle);
 }
 
 .proj-title {
-  font-size: 13.5px;
+  font-size: 13px;
   font-weight: 600;
+  margin-bottom: 1px;
+}
+
+.proj-meta {
+  font-size: 12px;
+  color: var(--subtle);
   margin-bottom: 2px;
-}
-
-.proj-title a {
-  color: var(--text);
-}
-
-.proj-title a:hover {
-  color: var(--link);
 }
 
 .proj-desc {
-  font-size: 13px;
+  font-size: 12.5px;
   color: var(--text);
-  margin-bottom: 2px;
-  line-height: 1.55;
+  margin-bottom: 1px;
+  line-height: 1.5;
 }
 
 ul {
@@ -190,18 +197,65 @@ ul {
 }
 
 li {
-  font-size: 13px;
-  margin-bottom: 2px;
-  line-height: 1.5;
+  font-size: 12.5px;
+  margin-bottom: 1px;
+  line-height: 1.45;
 }
 
 .tech-stack {
-  font-size: 13px;
+  font-size: 12px;
   color: var(--subtle);
-  margin-top: 2px;
+  margin-top: 1px;
 }
 
-/* ── Editor (unchanged) ── */
+/* ══════════════════════════════════════
+   Skills (inline in personal info)
+   ══════════════════════════════════════ */
+
+.skills-inline {
+  margin-top: 4px;
+}
+
+.skills-inline p {
+  font-size: 12.5px;
+  color: var(--text);
+  margin-bottom: 1px;
+  line-height: 1.45;
+}
+
+/* ══════════════════════════════════════
+   Awards & Publications
+   ══════════════════════════════════════ */
+
+.award-date {
+  color: var(--subtle);
+  margin-left: 4px;
+  font-size: 12px;
+}
+
+.pub-list li {
+  font-size: 12px;
+}
+
+/* ══════════════════════════════════════
+   Code links / Personal docs
+   ══════════════════════════════════════ */
+
+.code-links p {
+  font-size: 13px;
+  margin-bottom: 1px;
+}
+
+.docs-summary {
+  font-size: 12.5px;
+  margin-bottom: 4px;
+  color: var(--text);
+  line-height: 1.45;
+}
+
+/* ══════════════════════════════════════
+   Editor
+   ══════════════════════════════════════ */
 
 .editor-page {
   width: min(1400px, 96vw);
@@ -228,10 +282,7 @@ li {
   border-bottom: 1px solid #d7e0eb;
 }
 
-.toolbar h1 {
-  margin: 0;
-  font-size: 18px;
-}
+.toolbar h1 { margin: 0; font-size: 18px; }
 
 button {
   border: none;
@@ -267,7 +318,9 @@ iframe {
   border: none;
 }
 
-/* ── Print bar ── */
+/* ══════════════════════════════════════
+   Print bar
+   ══════════════════════════════════════ */
 
 .print-bar {
   display: flex;
@@ -296,43 +349,29 @@ iframe {
   text-decoration: none;
 }
 
-/* ── Print ── */
+/* ══════════════════════════════════════
+   Print
+   ══════════════════════════════════════ */
 
 @media print {
-  .no-print {
-    display: none !important;
-  }
-
-  body {
-    background: white;
-  }
-
+  .no-print { display: none !important; }
+  body { background: white; }
   .page {
     width: 100%;
     margin: 0;
-    padding: 20px 24px;
+    padding: 14px 20px;
     min-height: auto;
   }
-
   a {
     color: var(--link) !important;
     text-decoration: none;
   }
-
-  section {
-    break-inside: avoid;
-  }
-
-  .block {
-    break-inside: avoid;
-  }
+  section { break-inside: avoid; }
+  .block { break-inside: avoid; }
 }
 
 @media screen {
-  body {
-    background: #e8e8e8;
-  }
-
+  body { background: #e8e8e8; }
   .page {
     margin: 0 auto 20px;
     box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);

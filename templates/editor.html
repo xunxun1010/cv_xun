@@ -10,57 +10,67 @@
     <main class="editor-page">
       <section class="editor-panel">
         <div class="toolbar">
-          <h1>YAMLResume Editor</h1>
-          <div>
-            <button id="saveBtn">保存 YAML</button>
-            <a href="/resume" target="_blank">打开预览</a>
+          <h1>编辑：{{ current_file }}</h1>
+          <div style="display:flex;align-items:center;gap:8px;">
+            {% if all_files|length > 1 %}
+            <select id="fileSwitcher" style="padding:6px 8px;border-radius:6px;border:1px solid #ccc;font-size:13px;">
+              {% for f in all_files %}
+              <option value="{{ f }}" {% if f == current_file %}selected{% endif %}>{{ f }}</option>
+              {% endfor %}
+            </select>
+            {% endif %}
+            <button id="saveBtn">保存</button>
+            <a href="/" target="_blank">首页</a>
           </div>
         </div>
         <textarea id="yamlInput">{{ yaml_text }}</textarea>
-        <p id="status"></p>
+        <p id="status">Ctrl+S 保存</p>
       </section>
       <section class="preview-panel">
-        <iframe id="previewFrame" src="/resume" title="简历预览"></iframe>
+        <iframe id="previewFrame" src="/resume?file={{ current_file }}" title="简历预览"></iframe>
       </section>
     </main>
 
     <script>
+      const currentFile = "{{ current_file }}";
       const saveBtn = document.getElementById("saveBtn");
       const yamlInput = document.getElementById("yamlInput");
       const statusText = document.getElementById("status");
       const previewFrame = document.getElementById("previewFrame");
-      // const AUTO_REFRESH_MS = 3000;//自动刷新，已注释
+      const fileSwitcher = document.getElementById("fileSwitcher");
 
       function refreshPreview() {
-        previewFrame.src = "/resume?t=" + Date.now();
+        previewFrame.src = "/resume?file=" + encodeURIComponent(currentFile) + "&t=" + Date.now();
       }
 
-      statusText.textContent = "已开启自动预览刷新（每 3 秒）";
-      // setInterval(refreshPreview, AUTO_REFRESH_MS);
-      // 1. 保存按钮的点击事件（fetch 异步请求，用了 try-catch）
+      // File switcher
+      if (fileSwitcher) {
+        fileSwitcher.addEventListener("change", () => {
+          window.location.href = "/editor?file=" + encodeURIComponent(fileSwitcher.value);
+        });
+      }
+
       saveBtn.addEventListener("click", async () => {
         statusText.textContent = "保存中...";
         try {
-          const resp = await fetch("/api/resume/raw", {
+          const resp = await fetch("/api/resume/raw?file=" + encodeURIComponent(currentFile), {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ yaml_text: yamlInput.value }),
           });
           const data = await resp.json();
           if (!resp.ok) throw new Error(data.detail || "保存失败");
-          statusText.textContent = "保存成功，预览已刷新（自动刷新已关闭，开启请取消注释）。";//这里是保存后可预览
+          statusText.textContent = "已保存 " + new Date().toLocaleTimeString();
           refreshPreview();
         } catch (err) {
           statusText.textContent = "保存失败：" + err.message;
         }
       });
 
-      // 2. 全局键盘监听（ctrl+s同时按下会保存当前页面）
       document.addEventListener('keydown', function(e) {
-        // 拦截 Ctrl+S (Windows) 或 Cmd+S (Mac)
         if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
-          e.preventDefault(); // 阻止浏览器默认保存网页的行为
-          saveBtn.click();    // 触发上面写好的保存按钮点击事件
+          e.preventDefault();
+          saveBtn.click();
         }
       });
     </script>

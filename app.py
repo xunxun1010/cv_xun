@@ -1,8 +1,9 @@
+import os
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any, Dict, List, Optional
 
 import yaml
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Query
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
@@ -11,7 +12,7 @@ from pydantic import BaseModel
 
 
 BASE_DIR = Path(__file__).resolve().parent
-RESUME_FILE = BASE_DIR / "resume.yaml"
+DEFAULT_YAML = os.environ.get("EASYCV_YAML", "resume.yaml")
 
 app = FastAPI(title="easy-cv", version="0.1.0")
 app.mount("/static", StaticFiles(directory=str(BASE_DIR / "static")), name="static")
@@ -26,31 +27,72 @@ class ResumeRawPayload(BaseModel):
     yaml_text: str
 
 
-def _read_resume() -> Dict[str, Any]:
-    if not RESUME_FILE.exists():
-        raise HTTPException(status_code=404, detail="resume.yaml 不存在")
-    text = RESUME_FILE.read_text(encoding="utf-8")
+YAML_DIRS = [BASE_DIR, BASE_DIR / "cv"]
+
+
+def _resolve_file(filename: str) -> Path:
+    """Resolve a YAML filename, blocking path traversal. Searches root and cv/."""
+    p = Path(filename)
+    if ".." in str(p) or p.is_absolute():
+        raise HTTPException(status_code=400, detail="不允许的路径")
+
+    # Direct path (e.g. "cv/xun.yaml" or "resume.yaml")
+    candidate = BASE_DIR / p
+    if candidate.exists():
+        return candidate
+
+    # Try cv/ subdirectory as fallback
+    cv_candidate = BASE_DIR / "cv" / p.name
+    if cv_candidate.exists():
+        return cv_candidate
+
+    # File doesn't exist yet — use the direct path for writes
+    return candidate
+
+
+def _list_yaml_files() -> List[str]:
+    """List all *.yaml / *.yml files in root and cv/."""
+    files = []
+    for d in YAML_DIRS:
+        if not d.is_dir():
+            continue
+        for f in sorted(d.iterdir()):
+            if f.suffix in (".yaml", ".yml") and f.is_file():
+                rel = str(f.relative_to(BASE_DIR)).replace("\\", "/")
+                files.append(rel)
+    return files
+
+
+def _read_resume(filename: str) -> Dict[str, Any]:
+    path = _resolve_file(filename)
+    if not path.exists():
+        raise HTTPException(status_code=404, detail=f"{filename} 不存在")
+    text = path.read_text(encoding="utf-8")
     parsed = yaml.safe_load(text) or {}
     if not isinstance(parsed, dict):
-        raise HTTPException(status_code=400, detail="resume.yaml 顶层必须是对象")
+        raise HTTPException(status_code=400, detail=f"{filename} 顶层必须是对象")
     return parsed
 
 
-def _write_resume(data: Dict[str, Any]) -> None:
-    RESUME_FILE.write_text(
+def _write_resume(filename: str, data: Dict[str, Any]) -> None:
+    path = _resolve_file(filename)
+    path.write_text(
         yaml.safe_dump(data, sort_keys=False, allow_unicode=True),
         encoding="utf-8",
     )
 
 
 @app.get("/", include_in_schema=False)
-def root() -> RedirectResponse:
-    return RedirectResponse(url="/resume")
+def root(request: Request) -> HTMLResponse:
+    files = _list_yaml_files()
+    return templates.TemplateResponse(
+        request, "index.html", context={"files": files}
+    )
 
 
 @app.get("/resume", response_class=HTMLResponse, include_in_schema=False)
-def resume_page(request: Request) -> HTMLResponse:
-    data = _read_resume()
+def resume_page(request: Request, file: str = Query(default=DEFAULT_YAML)) -> HTMLResponse:
+    data = _read_resume(file)
     return templates.TemplateResponse(
         request,
         "resume.html",
@@ -64,48 +106,59 @@ def resume_page(request: Request) -> HTMLResponse:
             "personal_projects": data.get("personal_projects", []),
             "lab_tutorials": data.get("lab_tutorials", []),
             "skills": data.get("skills", []),
-            "open_source_experience": data.get("open_source_experience", []),
-            "project_experience": data.get("project_experience", []),
+            "awards": data.get("awards", []),
+            "publications": data.get("publications", []),
+            "honors": data.get("honors", []),
+            "current_file": file,
+            "all_files": _list_yaml_files(),
         },
     )
 
 
 @app.get("/editor", response_class=HTMLResponse, include_in_schema=False)
-def editor_page(request: Request) -> HTMLResponse:
-    yaml_text = RESUME_FILE.read_text(encoding="utf-8") if RESUME_FILE.exists() else ""
+def editor_page(request: Request, file: str = Query(default=DEFAULT_YAML)) -> HTMLResponse:
+    path = _resolve_file(file)
+    yaml_text = path.read_text(encoding="utf-8") if path.exists() else ""
     return templates.TemplateResponse(
-        request, "editor.html", context={"yaml_text": yaml_text}
+        request,
+        "editor.html",
+        context={
+            "yaml_text": yaml_text,
+            "current_file": file,
+            "all_files": _list_yaml_files(),
+        },
     )
 
 
 @app.get("/api/resume")
-def get_resume_data() -> Dict[str, Any]:
-    return _read_resume()
+def get_resume_data(file: str = Query(default=DEFAULT_YAML)) -> Dict[str, Any]:
+    return _read_resume(file)
 
 
 @app.put("/api/resume")
-def put_resume_data(payload: ResumeDataPayload) -> Dict[str, str]:
-    _write_resume(payload.data)
-    return {"message": "已更新 resume.yaml"}
+def put_resume_data(payload: ResumeDataPayload, file: str = Query(default=DEFAULT_YAML)) -> Dict[str, str]:
+    _write_resume(file, payload.data)
+    return {"message": f"已更新 {file}"}
 
 
 @app.get("/api/resume/raw")
-def get_resume_raw() -> Dict[str, str]:
-    if not RESUME_FILE.exists():
-        raise HTTPException(status_code=404, detail="resume.yaml 不存在")
-    return {"yaml_text": RESUME_FILE.read_text(encoding="utf-8")}
+def get_resume_raw(file: str = Query(default=DEFAULT_YAML)) -> Dict[str, str]:
+    path = _resolve_file(file)
+    if not path.exists():
+        raise HTTPException(status_code=404, detail=f"{file} 不存在")
+    return {"yaml_text": path.read_text(encoding="utf-8")}
 
 
 @app.put("/api/resume/raw")
-def put_resume_raw(payload: ResumeRawPayload) -> Dict[str, str]:
+def put_resume_raw(payload: ResumeRawPayload, file: str = Query(default=DEFAULT_YAML)) -> Dict[str, str]:
     try:
         parsed = yaml.safe_load(payload.yaml_text) or {}
     except yaml.YAMLError as exc:
         raise HTTPException(status_code=400, detail=f"YAML 解析失败: {exc}") from exc
     if not isinstance(parsed, dict):
         raise HTTPException(status_code=400, detail="YAML 顶层必须是对象")
-    RESUME_FILE.write_text(payload.yaml_text, encoding="utf-8")
-    return {"message": "YAML 已保存"}
+    _write_resume(file, parsed)
+    return {"message": f"YAML 已保存到 {file}"}
 
 
 if __name__ == "__main__":

@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>easyCV - 简历列表</title>
+    <style>
+      body {
+        font-family: "Source Han Sans SC", "Noto Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif;
+        background: #f0f2f5;
+        display: flex;
+        justify-content: center;
+        padding: 40px 20px;
+      }
+      .container {
+        max-width: 500px;
+        width: 100%;
+      }
+      h1 {
+        font-size: 24px;
+        color: #2878b5;
+        margin-bottom: 8px;
+      }
+      .subtitle {
+        color: #888;
+        margin-bottom: 24px;
+        font-size: 14px;
+      }
+      .file-list {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+      .file-card {
+        background: white;
+        border-radius: 10px;
+        padding: 16px 20px;
+        box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .file-card:hover {
+        box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+      }
+      .file-name {
+        font-size: 15px;
+        font-weight: 600;
+        color: #333;
+      }
+      .file-actions {
+        display: flex;
+        gap: 8px;
+      }
+      .btn {
+        padding: 6px 14px;
+        border-radius: 6px;
+        font-size: 13px;
+        text-decoration: none;
+        cursor: pointer;
+        border: none;
+      }
+      .btn-view {
+        background: #2878b5;
+        color: white;
+      }
+      .btn-edit {
+        background: #f0f2f5;
+        color: #333;
+      }
+      .btn-view:hover { background: #1d5f94; }
+      .btn-edit:hover { background: #e0e3e8; }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>easyCV</h1>
+      <p class="subtitle">选择一个简历文件预览或编辑</p>
+      <div class="file-list">
+        {% for f in files %}
+        <div class="file-card">
+          <span class="file-name">{{ f }}</span>
+          <div class="file-actions">
+            <a class="btn btn-view" href="/resume?file={{ f }}">预览</a>
+            <a class="btn btn-edit" href="/editor?file={{ f }}">编辑</a>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </body>
+</html>
