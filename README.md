@@ -1,7 +1,11 @@
 # cv_xun
 #### sources:
-1.[easycv](https://github.com/lvy010/easyCV)
+1.[easycv](https://github.com/lvy010/easyCV)  
 2.[wenjiayi_cv](https://github.com/Trinkle23897/CV/blob/master/resume.tex)
+### 更改
+<img width="1691" height="786" alt="image" src="https://github.com/user-attachments/assets/ab695926-528e-41dc-bac5-bf248da71d92" />
+增加项目管理界面，可以管理自己的简历版本  
+
 ### 1.项目预览
 
 ---
