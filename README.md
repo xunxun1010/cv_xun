@@ -4,6 +4,8 @@
 2.[wenjiayi_cv](https://github.com/Trinkle23897/CV/blob/master/resume.tex)
 ### 更改
 <img width="1691" height="786" alt="image" src="https://github.com/user-attachments/assets/ab695926-528e-41dc-bac5-bf248da71d92" />
+<img width="1691" height="639" alt="image" src="https://github.com/user-attachments/assets/f29e91c8-5ea9-4d37-8de8-289c4c6f3ad1" />
+
 增加项目管理界面，可以管理自己的简历版本  
 
 ### 1.项目预览
